@@ -7,22 +7,24 @@ app = FastAPI()
 
 @app.post("/process")
 async def process_face(file: UploadFile = File(...)):
-    # сохраняем загруженное фото (например, как emoca.obj пока для теста)
+    # сохраняем загруженный файл как emoca.obj
     input_path = "/workspace/emoca.obj"
     with open(input_path, "wb") as f:
         f.write(await file.read())
 
-    # вызываем Blender с нашим bake.py
-    cmd = [
-        "blender", "-b", "--python", "bake.py"
-    ]
-    subprocess.run(cmd, check=True)
+    # Запускаем Blender с bake.py
+    cmd = ["blender", "-b", "--python", "/workspace/bake.py"]
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        return {"error": f"Blender failed: {str(e)}"}
 
     output_path = "/workspace/final_texture.png"
     if os.path.exists(output_path):
         return {"result": output_path}
     else:
-        return {"error": "Bake failed"}
+        return {"error": "No output generated"}
     
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
