@@ -1,2 +1,8 @@
 fastapi
 uvicorn
+python-multipart
+requests
+numpy
+Pillow
+opencv-python-headless
+trimesh
